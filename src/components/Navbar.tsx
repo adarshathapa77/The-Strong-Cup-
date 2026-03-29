@@ -1,14 +1,18 @@
 import { ShoppingCart, Search, Package, Menu, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import AdminCodeModal from './AdminCodeModal';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const { cartCount } = useCart();
   const location = useLocation();
+  const logoClickCountRef = useRef(0);
+  const logoClickTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +27,27 @@ export default function Navbar() {
     setIsMobileMenuOpen(false);
   }, [location]);
 
+  // Handle 5-tap logo trigger for admin access
+  const handleLogoClick = () => {
+    logoClickCountRef.current += 1;
+
+    // Clear timeout and reset counter after 2 seconds
+    if (logoClickTimeoutRef.current) {
+      clearTimeout(logoClickTimeoutRef.current);
+    }
+
+    if (logoClickCountRef.current === 5) {
+      // 5 taps detected - show admin modal
+      setIsAdminModalOpen(true);
+      logoClickCountRef.current = 0;
+    } else {
+      // Reset counter after 2 seconds of inactivity
+      logoClickTimeoutRef.current = setTimeout(() => {
+        logoClickCountRef.current = 0;
+      }, 2000);
+    }
+  };
+
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Shop', path: '/shop' },
@@ -33,18 +58,17 @@ export default function Navbar() {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'glass py-3 shadow-md' : 'bg-transparent py-4'}`}>
       <div className="max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between">
-        {/* Logo */}
-        <Link 
-          to="/"
-          className="flex items-center cursor-pointer group" 
-        >
-          <div className="w-8 h-8 bg-tea-brown rounded-lg flex items-center justify-center mr-2 shadow-lg group-hover:bg-tea-gold transition-colors">
-            <ShoppingCart className="text-tea-cream" size={16} />
-          </div>
-          <h1 className="text-base md:text-lg font-serif font-bold tracking-tight text-tea-brown">
-            THE <span className="text-tea-gold italic">STRONG</span> CUP
-          </h1>
-        </Link>
+        {/* Logo with Hidden Admin Trigger */}
+        <div className="flex items-center cursor-pointer group" onClick={handleLogoClick}>
+          <Link to="/" className="flex items-center cursor-pointer group">
+            <div className="w-8 h-8 bg-tea-brown rounded-lg flex items-center justify-center mr-2 shadow-lg group-hover:bg-tea-gold transition-colors">
+              <ShoppingCart className="text-tea-cream" size={16} />
+            </div>
+            <h1 className="text-base md:text-lg font-serif font-bold tracking-tight text-tea-brown">
+              THE <span className="text-tea-gold italic">STRONG</span> CUP
+            </h1>
+          </Link>
+        </div>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-6">
@@ -114,6 +138,9 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Admin Code Modal */}
+      <AdminCodeModal isOpen={isAdminModalOpen} onClose={() => setIsAdminModalOpen(false)} />
     </nav>
   );
 }

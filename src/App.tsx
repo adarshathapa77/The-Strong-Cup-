@@ -3,7 +3,9 @@ import { AnimatePresence } from 'motion/react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
+import ProtectedRoute from './components/ProtectedRoute';
 import { CartProvider } from './context/CartContext';
+import { AdminProvider } from './context/AdminContext';
 
 // Pages
 import Home from './pages/Home';
@@ -16,15 +18,18 @@ import Success from './pages/Success';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import TrackOrder from './pages/TrackOrder';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 
 function AppContent() {
   const location = useLocation();
   const isProductPage = location.pathname.startsWith('/product/');
+  const isAdminPage = location.pathname.startsWith('/admin/');
 
   return (
     <div className="min-h-screen bg-tea-cream selection:bg-tea-gold selection:text-tea-brown flex flex-col">
       <ScrollToTop />
-      {!isProductPage && <Navbar />}
+      {!isProductPage && !isAdminPage && <Navbar />}
       
       <main className="flex-grow">
         <AnimatePresence mode="wait">
@@ -39,11 +44,22 @@ function AppContent() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/track-order" element={<TrackOrder />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route 
+              path="/admin/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </AnimatePresence>
       </main>
 
-      {!isProductPage && <Footer />}
+      {!isProductPage && !isAdminPage && <Footer />}
     </div>
   );
 }
@@ -51,9 +67,11 @@ function AppContent() {
 export default function App() {
   return (
     <CartProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <AdminProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </AdminProvider>
     </CartProvider>
   );
 }
