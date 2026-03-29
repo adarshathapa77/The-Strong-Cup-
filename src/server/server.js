@@ -12,6 +12,9 @@ import {
   logAuditAction,
   updateLastLogin,
 } from './auth.js';
+import userAuthRoutes from './routes/userAuth.js';
+import orderRoutes from './routes/orders.js';
+import invoiceRoutes from './routes/invoices.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,6 +22,11 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Register API Routes
+app.use('/api/users', userAuthRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/invoices', invoiceRoutes);
 
 // Helper function to get client IP
 function getClientIp(req) {

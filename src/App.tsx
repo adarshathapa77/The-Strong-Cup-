@@ -6,6 +6,7 @@ import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import { CartProvider } from './context/CartContext';
 import { AdminProvider } from './context/AdminContext';
+import { UserProvider } from './context/UserContext';
 
 // Pages
 import Home from './pages/Home';
@@ -20,6 +21,10 @@ import Contact from './pages/Contact';
 import TrackOrder from './pages/TrackOrder';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import UserRegister from './pages/UserRegister';
+import UserLogin from './pages/UserLogin';
+import UserDashboard from './pages/UserDashboard';
+import UserOrders from './pages/UserOrders';
 
 function AppContent() {
   const location = useLocation();
@@ -45,6 +50,12 @@ function AppContent() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/track-order" element={<TrackOrder />} />
             
+            {/* User Routes */}
+            <Route path="/user/register" element={<UserRegister />} />
+            <Route path="/user/login" element={<UserLogin />} />
+            <Route path="/user/dashboard" element={<UserDashboard />} />
+            <Route path="/user/orders" element={<UserOrders />} />
+            
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route 
@@ -68,9 +79,11 @@ export default function App() {
   return (
     <CartProvider>
       <AdminProvider>
-        <Router>
-          <AppContent />
-        </Router>
+        <UserProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </UserProvider>
       </AdminProvider>
     </CartProvider>
   );
