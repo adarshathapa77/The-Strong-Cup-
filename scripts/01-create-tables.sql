@@ -4,6 +4,23 @@
 -- Purpose: Create all tables for user, order, and admin management
 -- =====================================================
 
+-- 0. ADMIN USERS TABLE (Must be created first - referenced by admin_sessions)
+-- Stores admin credentials and access information
+CREATE TABLE IF NOT EXISTS admin_users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    secret_code VARCHAR(50) DEFAULT 'NANU',
+    last_login TIMESTAMP,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_users_email ON admin_users(email);
+
+-- =====================================================
+
 -- 1. USERS TABLE (Customer Records)
 -- Stores registered user information
 CREATE TABLE IF NOT EXISTS users (
@@ -133,15 +150,6 @@ CREATE TABLE IF NOT EXISTS admin_audit_log (
 CREATE INDEX IF NOT EXISTS idx_audit_admin_id ON admin_audit_log(admin_id);
 CREATE INDEX IF NOT EXISTS idx_audit_action ON admin_audit_log(action);
 CREATE INDEX IF NOT EXISTS idx_audit_created_at ON admin_audit_log(created_at DESC);
-
--- =====================================================
-
--- 7. UPDATE ADMIN_USERS TABLE IF NEEDED
--- Ensure admin_users table has all required columns
-ALTER TABLE admin_users 
-    ADD COLUMN IF NOT EXISTS last_login TIMESTAMP,
-    ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true,
-    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
 -- =====================================================
 -- SUMMARY OF TABLES CREATED:
