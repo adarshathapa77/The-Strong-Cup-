@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Truck, CheckCircle2, AlertCircle, Calendar, MapPin } from 'lucide-react';
+import { Truck, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Calendar, MapPin } from 'lucide-react';
 import { ServiceabilityInfo } from '../services/pincodeService';
 
 interface DeliveryInfoProps {

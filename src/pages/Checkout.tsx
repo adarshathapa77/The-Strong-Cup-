@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ShieldCheck, Truck, CreditCard, CheckCircle2, User, MapPin } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ShieldCheck, Truck, CreditCard, CircleCheck as CheckCircle2, User, MapPin } from 'lucide-react';
 import { usePincodeSearch } from '../hooks/usePincodeSearch';
 import PincodeAutocomplete from '../components/PincodeAutocomplete';
 import DeliveryInfo from '../components/DeliveryInfo';

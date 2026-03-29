@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MapPin, Loader2, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { MapPin, Loader as Loader2, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, X } from 'lucide-react';
 import { PincodeResult } from '../services/pincodeService';
 
 interface PincodeAutocompleteProps {
