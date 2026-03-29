@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ShieldCheck, Truck, CreditCard, CheckCircle2, User, MapPin } from 'lucide-react';
+import { usePincodeSearch } from '../hooks/usePincodeSearch';
+import PincodeAutocomplete from '../components/PincodeAutocomplete';
+import DeliveryInfo from '../components/DeliveryInfo';
 
 const Checkout: React.FC = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -23,6 +26,39 @@ const Checkout: React.FC = () => {
     state: '',
     pincode: ''
   });
+
+  const {
+    query: pincodeQuery,
+    setQuery: setPincodeQuery,
+    suggestions: pincodeSuggestions,
+    isLoading: isPincodeLoading,
+    error: pincodeError,
+    selectedPincode,
+    selectPincode,
+    deliveryInfo,
+    clearSelection: clearPincodeSelection,
+  } = usePincodeSearch();
+
+  useEffect(() => {
+    if (selectedPincode) {
+      setFormData(prev => ({
+        ...prev,
+        pincode: selectedPincode.pincode,
+        city: selectedPincode.city,
+        state: selectedPincode.state,
+      }));
+
+      if (errors.pincode) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.pincode;
+          delete newErrors.city;
+          delete newErrors.state;
+          return newErrors;
+        });
+      }
+    }
+  }, [selectedPincode]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -50,16 +86,20 @@ const Checkout: React.FC = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.email) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email';
-    
+
     if (!formData.phone) newErrors.phone = 'Phone is required';
     else if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = 'Invalid phone (10 digits)';
-    
+
     if (!formData.fullName) newErrors.fullName = 'Full name is required';
     if (!formData.address) newErrors.address = 'Address is required';
     if (!formData.city) newErrors.city = 'City is required';
     if (!formData.state) newErrors.state = 'State is required';
     if (!formData.pincode) newErrors.pincode = 'Pincode is required';
     else if (!/^\d{6}$/.test(formData.pincode)) newErrors.pincode = 'Invalid pincode';
+
+    if (deliveryInfo && !deliveryInfo.is_serviceable) {
+      newErrors.pincode = 'Delivery not available for this pincode';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -194,42 +234,55 @@ const Checkout: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="space-y-2">
                         <label className="text-xs font-bold text-tea-brown/40 uppercase tracking-widest">City</label>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           name="city"
                           value={formData.city}
                           onChange={handleChange}
                           onKeyDown={(e) => handleKeyDown(e, 'state')}
                           placeholder="City"
-                          className={`w-full bg-tea-cream/30 border-2 ${errors.city ? 'border-red-400' : 'border-tea-brown/5'} p-3 rounded-xl focus:border-tea-gold outline-none transition-all`}
+                          readOnly={!!selectedPincode}
+                          className={`w-full bg-tea-cream/30 border-2 ${errors.city ? 'border-red-400' : 'border-tea-brown/5'} p-3 rounded-xl focus:border-tea-gold outline-none transition-all ${selectedPincode ? 'bg-tea-green/5 cursor-not-allowed' : ''}`}
                         />
                         {errors.city && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest">{errors.city}</p>}
                       </div>
                       <div className="space-y-2">
                         <label className="text-xs font-bold text-tea-brown/40 uppercase tracking-widest">State</label>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           name="state"
                           value={formData.state}
                           onChange={handleChange}
                           onKeyDown={(e) => handleKeyDown(e, 'pincode')}
                           placeholder="State"
-                          className={`w-full bg-tea-cream/30 border-2 ${errors.state ? 'border-red-400' : 'border-tea-brown/5'} p-3 rounded-xl focus:border-tea-gold outline-none transition-all`}
+                          readOnly={!!selectedPincode}
+                          className={`w-full bg-tea-cream/30 border-2 ${errors.state ? 'border-red-400' : 'border-tea-brown/5'} p-3 rounded-xl focus:border-tea-gold outline-none transition-all ${selectedPincode ? 'bg-tea-green/5 cursor-not-allowed' : ''}`}
                         />
                         {errors.state && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest">{errors.state}</p>}
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 md:col-span-3">
                         <label className="text-xs font-bold text-tea-brown/40 uppercase tracking-widest">Pincode</label>
-                        <input 
-                          type="text" 
-                          name="pincode"
-                          value={formData.pincode}
-                          onChange={handleChange}
-                          placeholder="6-digit"
-                          className={`w-full bg-tea-cream/30 border-2 ${errors.pincode ? 'border-red-400' : 'border-tea-brown/5'} p-3 rounded-xl focus:border-tea-gold outline-none transition-all`}
+                        <PincodeAutocomplete
+                          value={pincodeQuery}
+                          onChange={setPincodeQuery}
+                          suggestions={pincodeSuggestions}
+                          isLoading={isPincodeLoading}
+                          error={errors.pincode || pincodeError}
+                          onSelect={selectPincode}
+                          onClear={clearPincodeSelection}
+                          placeholder="Enter pincode or city name"
                         />
-                        {errors.pincode && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest">{errors.pincode}</p>}
                       </div>
+
+                      {deliveryInfo && (
+                        <div className="md:col-span-3">
+                          <DeliveryInfo
+                            deliveryInfo={deliveryInfo}
+                            city={formData.city}
+                            state={formData.state}
+                          />
+                        </div>
+                      )}
                     </div>
                   </motion.div>
               </div>
