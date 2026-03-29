@@ -4,11 +4,11 @@ import { useAdmin } from '../context/AdminContext';
 import { LogOut, BarChart3, ShoppingCart, Users, TrendingUp } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const { adminEmail, logout } = useAdmin();
+  const { adminUser, logout } = useAdmin();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
@@ -28,7 +28,9 @@ export default function AdminDashboard() {
             <h1 className="text-3xl md:text-4xl font-serif font-bold text-tea-brown">
               Admin <span className="text-tea-gold italic">Dashboard</span>
             </h1>
-            <p className="text-tea-brown/60 text-sm mt-1">Welcome back, {adminEmail}</p>
+            <p className="text-tea-brown/60 text-sm mt-1">
+              Welcome back, {adminUser?.name || adminUser?.email}
+            </p>
           </div>
 
           <motion.button

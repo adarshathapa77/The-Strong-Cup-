@@ -19,18 +19,13 @@ export default function AdminLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      if (login(email, password)) {
-        setIsLoading(false);
-        navigate('/admin/dashboard');
-      } else {
-        setIsLoading(false);
-        setError('Invalid email or password');
-      }
-    }, 600);
+    
+    const result = await login(email, password);
+    if (result.success) {
+      navigate('/admin/dashboard');
+    } else {
+      setError(result.message || 'Login failed');
+    }
   };
 
   const handleBack = () => {
@@ -145,11 +140,11 @@ export default function AdminLogin() {
             {/* Demo Credentials (for testing) */}
             <div className="mt-8 pt-6 border-t border-tea-brown/10">
               <p className="text-xs text-tea-brown/60 text-center font-medium mb-3">
-                Demo Credentials (Testing Only)
+                Default Admin Credentials
               </p>
               <div className="space-y-2 text-xs text-tea-brown/50">
                 <p>Email: <span className="font-mono">admin@thestrong.com</span></p>
-                <p>Password: <span className="font-mono">admin123</span></p>
+                <p>Password: <span className="font-mono">NANU@ADMIN</span></p>
               </div>
             </div>
           </motion.div>
